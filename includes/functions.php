@@ -19,10 +19,7 @@ function createMapping($field) {
     $arr['metafields_global_title_tag'] = 'Paramount BP ' . $arr['title'];
     $arr['metafields_global_description_tag'] = $field[28]; 
     $arr['variants'] = array(getbasicVariants($field));
-//    //variants
-//    $basicVariants = array(getbasicVariants($field));
-//    $variants = getAllVariants($field, $pricePlans, $basicVariants);
-//    $arr['variants'] = $variants;
+
     return $arr;
 }
 
@@ -69,33 +66,55 @@ function getPricePlans($pricePlans) {
     return $productPricePlan;
 }
 
-function getAllVariants($product, $pricePlans, $basicVariants) {
-    $sku = trim($product[6]);
-    $planArr = array(
-        'Default Title' => 'X4C2',
-        'Default Title (X4C3)' => 'X4C3',
-        'Default Title (X6C1)' => 'X6C1',
-        'Default Title (X6C2)' => 'X6C2',
-        'Default Title (X6C3)' => 'X6C3'
-    );
-    foreach($planArr as $key => $value) {
-        $pricePlan = createPricePlanPostData($key, $pricePlans[ $sku ][$value], $sku);
-        $pricePlanPostData[] = array_merge($pricePlan, $basicVariants[0]);
+function getVariants($products, $pricePlans) {
+    $variantData = array();
+    foreach ($products as $key => $product) {
+        $productVariants = $product['variants'];
+        $variant = getVariantArr($productVariants, $pricePlans);
+        $variantData = array_merge($variantData, $variant);
     }
-    return $pricePlanPostData;
+    return $variantData;
 }
 
-function createPricePlanPostData($option1, $price, $sku) {
+function getVariantArr($productVariants, $pricePlans) {
+    foreach ($productVariants as $key => $variant) {
+        $sku = $variant['sku'];
+        $pricePlan = $pricePlans[$sku];
+        $variantData[] = getVariantData($variant, $pricePlan);
+    }
+    return $variantData;
+}
+
+function getVariantData($variant, $pricePlan) {
+
+    switch ($variant['option1']) {
+        case PRICE_X4C2:
+            $data = makeVariantArr($variant['id'], $pricePlan['X4C2']);
+        break;
+
+        case PRICE_X4C3:
+            $data = makeVariantArr($variant['id'], $pricePlan['X4C3']);
+        break;
+
+        case PRICE_X6C1:
+            $data = makeVariantArr($variant['id'], $pricePlan['X6C1']);
+        break;
+
+        case PRICE_X6C2:
+            $data = makeVariantArr($variant['id'], $pricePlan['X6C2']);
+        break;
+
+        case PRICE_X6C3:
+            $data = makeVariantArr($variant['id'], $pricePlan['X6C3']);
+        break;
+    }
+
+    return $data;
+}
+
+function makeVariantArr($id, $price) {
     return array(
-            'option1' => $option1,
-            'price' => $price,
-            'sku' => $sku
+            'id' => $id,
+            'price' => $price
         );
-}
-
-function createVariantData($products, $pricePlans) {
-//foreach product get variant
-//    update variant with price plan
-//    write put api
-    return $products;
 }

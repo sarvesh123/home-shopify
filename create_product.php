@@ -5,7 +5,7 @@
 	require __DIR__.'/vendor/autoload.php';
 	use phpish\shopify;
 
-	require __DIR__.'/conf.php';
+	require __DIR__.'/includes/conf.php';
 
 	require __DIR__.'/spreadsheet-reader/SpreadsheetReader.php';
 
@@ -22,13 +22,12 @@
 	    $data = array('product' => $product);
 
 	    echo "<pre>";
-	    //print_r($data);
 		try
 		{
 			# Making an API request can throw an exception
-			$product = $shopify('POST /admin/products.json', array(), $data);
+			$response = $shopify('POST /admin/products.json', array(), $data);
 
-			print_r($product);
+			print_r($response);
 		}
 		catch (shopify\ApiException $e)
 		{
