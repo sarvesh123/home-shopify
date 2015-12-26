@@ -1,6 +1,7 @@
 <?php
 
 function getProductsArr($Reader) {
+    $products = array();
     foreach ($Reader as $key => $Row) {
         if ($key !== 0) {
             $products[] = createMapping($Row);
@@ -117,4 +118,21 @@ function makeVariantArr($id, $price) {
             'id' => $id,
             'price' => $price
         );
+}
+
+function getLatestFile($path) {
+
+    $latest_ctime = 0;
+    $latest_filename = '';    
+
+    $d = dir($path);
+    while (false !== ($entry = $d->read())) {
+      $filepath = "{$path}/{$entry}";
+      // could do also other checks than just checking whether the entry is a file
+      if (is_file($filepath) && filemtime($filepath) > $latest_ctime) {
+        $latest_ctime = filemtime($filepath);
+        $latest_filename = $entry;
+      }
+    }
+    return $latest_filename;
 }
