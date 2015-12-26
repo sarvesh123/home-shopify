@@ -104,7 +104,6 @@
 		private $SSForwarded = false;
 
 		private static $BuiltinFormats = array(
-			0 => '',
 			1 => '0',
 			2 => '0.00',
 			3 => '#,##0',
@@ -244,7 +243,7 @@
 			}
 
 			$Sheets = $this -> Sheets();
-
+			
 			foreach ($this -> Sheets as $Index => $Name)
 			{
 				if ($Zip -> locateName('xl/worksheets/sheet'.$Index.'.xml') !== false)
@@ -264,8 +263,7 @@
 				{
 					foreach ($this -> StylesXML -> cellXfs -> xf as $Index => $XF)
 					{
-						// Format #0 is a special case - it is the "General" format that is applied regardless of applyNumberFormat
-						if ($XF -> attributes() -> applyNumberFormat || (0 == (int)$XF -> attributes() -> numFmtId))
+						if ($XF -> attributes() -> applyNumberFormat)
 						{
 							$FormatId = (int)$XF -> attributes() -> numFmtId;
 							// If format ID >= 164, it is a custom format and should be read from styleSheet\numFmts
@@ -273,8 +271,7 @@
 						}
 						else
 						{
-							// 0 for "General" format
-							$this -> Styles[] = 0;
+							$this -> Styles[] = false;
 						}
 					}
 				}
@@ -370,15 +367,15 @@
 				$this -> Sheets = array();
 				foreach ($this -> WorkbookXML -> sheets -> sheet as $Index => $Sheet)
 				{
-					$Attributes = $Sheet -> attributes('r', true);
-					foreach ($Attributes as $Name => $Value)
-					{
-						if ($Name == 'id')
-						{
-							$SheetID = (int)str_replace('rId', '', (string)$Value);
-							break;
-						}
-					}
+
+                    $Attributes = $Sheet -> attributes();
+                    foreach ($Attributes as $Name => $Value)
+                    {
+                        if ($Name == 'sheetId') {
+                            $SheetID = (int)$Value;
+                            break;
+                        }
+                    }
 
 					$this -> Sheets[$SheetID] = (string)$Sheet['name'];
 				}
@@ -409,7 +406,6 @@
 			if ($RealSheetIndex !== false && is_readable($TempWorksheetPath))
 			{
 				$this -> WorksheetPath = $TempWorksheetPath;
-
 				$this -> rewind();
 				return true;
 			}
@@ -616,19 +612,13 @@
 				return $Value;
 			}
 
-			if (isset($this -> Styles[$Index]) && ($this -> Styles[$Index] !== false))
+			if (!empty($this -> Styles[$Index]))
 			{
 				$Index = $this -> Styles[$Index];
 			}
 			else
 			{
 				return $Value;
-			}
-
-			// A special case for the "General" format
-			if ($Index == 0)
-			{
-				return $this -> GeneralFormat($Value);
 			}
 
 			$Format = array();
@@ -790,12 +780,8 @@
 			// Applying format to value
 			if ($Format)
 			{
-    			if ($Format['Code'] == '@')
-    			{
-        			return (string)$Value;
-    			}
 				// Percentages
-				elseif ($Format['Type'] == 'Percentage')
+				if ($Format['Type'] == 'Percentage')
 				{
 					if ($Format['Code'] === '0%')
 					{
@@ -891,7 +877,7 @@
 						// Scaling
 						$Value = $Value / $Format['Scale'];
 
-						if (!empty($Format['MinWidth']) && $Format['Decimals'])
+						if ($Format['MinWidth'] && $Format['Decimals'])
 						{
 							if ($Format['Thousands'])
 							{
@@ -919,23 +905,6 @@
 			return $Value;
 		}
 
-		/**
-		 * Attempts to approximate Excel's "general" format.
-		 *
-		 * @param mixed Value
-		 *
-		 * @return mixed Result
-		 */
-		public function GeneralFormat($Value)
-		{
-			// Numeric format
-			if (is_numeric($Value))
-			{
-				$Value = (float)$Value;
-			}
-			return $Value;
-		}
-
 		// !Iterator interface methods
 		/** 
 		 * Rewind the Iterator to the first element.
@@ -943,24 +912,25 @@
 		 */ 
 		public function rewind()
 		{
-			// Removed the check whether $this -> Index == 0 otherwise ChangeSheet doesn't work properly
-
-			// If the worksheet was already iterated, XML file is reopened.
-			// Otherwise it should be at the beginning anyway
-			if ($this -> Worksheet instanceof XMLReader)
+			if ($this -> Index >= 0 || !($this -> Worksheet instanceof XMLReader))
 			{
-				$this -> Worksheet -> close();
-			}
-			else
-			{
-				$this -> Worksheet = new XMLReader;
+				// If the worksheet was already iterated, XML file is reopened.
+				// Otherwise it should be at the beginning anyway
+				if ($this -> Worksheet instanceof XMLReader)
+				{
+					$this -> Worksheet -> close();
+				}
+				else
+				{
+					$this -> Worksheet = new XMLReader;
+				}
+
+				$this -> Worksheet -> open($this -> WorksheetPath);
+				$this -> Valid = true;
+
+				$this -> RowOpen = false;
 			}
 
-			$this -> Worksheet -> open($this -> WorksheetPath);
-
-			$this -> Valid = true;
-			$this -> RowOpen = false;
-			$this -> CurrentRow = false;
 			$this -> Index = 0;
 		}
 
@@ -1077,7 +1047,6 @@
 							break;
 						// Cell value
 						case 'v':
-						case 'is':
 							if ($this -> Worksheet -> nodeType == XMLReader::END_ELEMENT)
 							{
 								continue;
@@ -1094,10 +1063,6 @@
 							if ($Value !== '' && $StyleId && isset($this -> Styles[$StyleId]))
 							{
 								$Value = $this -> FormatValue($Value, $StyleId);
-							}
-							elseif ($Value)
-							{
-								$Value = $this -> GeneralFormat($Value);
 							}
 
 							$this -> CurrentRow[$Index] = $Value;
