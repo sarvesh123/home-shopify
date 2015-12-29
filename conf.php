@@ -15,3 +15,8 @@
 	define('PRODUCTS_FILE_PATH', __DIR__.'/uploads');
 
 	error_reporting(E_ALL);
+	ini_set("display_errors", 1);
+
+	define('DB_HOST', 'localhost');
+	define('DB_USERNAME', 'root');
+	define('DB_PASSWORD', 'root');
