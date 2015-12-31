@@ -20,3 +20,11 @@
 	define('DB_HOST', 'localhost');
 	define('DB_USERNAME', 'root');
 	define('DB_PASSWORD', 'root');
+
+   	$conn = mysql_connect(DB_HOST, DB_USERNAME, DB_PASSWORD);
+   	if(! $conn )
+   	{
+    	die('Could not connect: ' . mysql_error());
+   	}
+   	mysql_select_db( 'shopify', $conn );
+   		

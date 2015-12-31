@@ -1,24 +1,32 @@
 <?php
 
-function getProductsArr($Reader) {
+function getProducts() {
+    global $conn;
+
+    $sql = "SELECT * FROM products";
+    $result = mysql_query( $sql, $conn );
+
     $products = array();
-    foreach ($Reader as $key => $Row) {
-        if ($key !== 0) {
-            $products[] = createMapping($Row);
+    if (mysql_num_rows($result)) {
+        while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
+            $products[] = createMapping($row);  
         }
+        return $products;
     }
-    return $products;
+    else {
+        return false;
+    }    
 }
 
 function createMapping($field) {
-    $arr['title'] = $field[2] . ' ' . $field[0];
-    $arr['body_html'] = $field[1];
-    $arr['vendor'] = $field[2];
-    $arr['product_type'] = $field[3];
-    $arr['tags'] = getTags($field[4]);    
-    $arr['images'] = array(getImageUrl(IMAGE_BASE_URL, $field[21]));  
+    $arr['title'] = $field['vendor'] . ' ' . $field['title'];
+    $arr['body_html'] = $field['description'];
+    $arr['vendor'] = $field['vendor'];
+    $arr['product_type'] = $field['type'];
+    $arr['tags'] = getTags($field['tags']);    
+    $arr['images'] = array(getImageUrl(IMAGE_BASE_URL, $field['image']));  
     $arr['metafields_global_title_tag'] = 'Paramount BP ' . $arr['title'];
-    $arr['metafields_global_description_tag'] = $field[28]; 
+    $arr['metafields_global_description_tag'] = $field['meta_description']; 
     $arr['variants'] = array(getbasicVariants($field));
 
     return $arr;
@@ -36,16 +44,12 @@ function getImageUrl($baseUrl, $imageName) {
     return array('src' => $baseUrl . $imageName);
 }
 
-function getInventoryQuantity($field) {
-    return ($field[13] + $field[14] + $field[15] + $field[16]);
-}
-
 function getbasicVariants($values) {
     return array(
-        'compare_at_price' => $values[20],
-        'grams' => getWeightGrams($values[12]),
-        'inventory_quantity' => getInventoryQuantity($values),
-        'sku' => trim($values[6]),
+        'compare_at_price' => $values['compare_price'],
+        'grams' => getWeightGrams($values['weight']),
+        'inventory_quantity' => $values['quantity'],
+        'sku' => trim($values['sku']),
         'taxable' => true
     );
 }
