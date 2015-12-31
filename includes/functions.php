@@ -140,3 +140,7 @@ function getLatestFile($path) {
     }
     return $latest_filename;
 }
+
+function sumQuantity($values) {
+    return ($values[13] + $values[14] + $values[15] + $values[16]);
+}
