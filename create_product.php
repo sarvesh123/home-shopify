@@ -43,6 +43,8 @@
 			}
 			echo "</pre>";
 		}
+
+		mysql_query("TRUNCATE TABLE " . TABLE_PRODUCTS);
 	}
 	else {
 		echo 'No Products found.';

@@ -27,4 +27,7 @@
     	die('Could not connect: ' . mysql_error());
    	}
    	mysql_select_db( 'shopify', $conn );
+
+   	define('TABLE_READ_FILES', 'read_files');
+   	define('TABLE_PRODUCTS', 'products');
    		

@@ -3,7 +3,7 @@
 function getProducts() {
     global $conn;
 
-    $sql = "SELECT * FROM products";
+    $sql = "SELECT * FROM " . TABLE_PRODUCTS;
     $result = mysql_query( $sql, $conn );
 
     $products = array();
@@ -143,4 +143,26 @@ function getLatestFile($path) {
 
 function sumQuantity($values) {
     return ($values[13] + $values[14] + $values[15] + $values[16]);
+}
+
+function fileUnread($fileName) {
+    global $conn;
+
+    $sql = "SELECT id FROM " . TABLE_READ_FILES . " WHERE name = '" . $fileName . "'";
+    $result = mysql_query( $sql, $conn );
+
+    if (mysql_num_rows($result)) {
+        return false;
+    }
+    else {
+        return true;
+    }    
+}
+
+function markFileRead($fileName, $path) {
+    global $conn;
+
+    $sql = "INSERT INTO " . TABLE_READ_FILES . " (name, path) VALUES ('" . $fileName . "', '" . mysql_real_escape_string($path) . "') ";
+
+    mysql_query( $sql, $conn );
 }
