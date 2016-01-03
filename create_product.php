@@ -10,8 +10,6 @@
 
 	$products = getProducts();
 
-   	mysql_close($conn);
-
    	if ($products) {
 
 		foreach($products as $product) {
@@ -43,9 +41,9 @@
 			}
 			echo "</pre>";
 		}
-
-		mysql_query("TRUNCATE TABLE " . TABLE_PRODUCTS);
+		updateShopifyPosted();
 	}
 	else {
 		echo 'No Products found.';
 	}
+	$mysqli->close();

@@ -21,12 +21,11 @@
 	define('DB_USERNAME', 'root');
 	define('DB_PASSWORD', 'root');
 
-   	$conn = mysql_connect(DB_HOST, DB_USERNAME, DB_PASSWORD);
-   	if(! $conn )
-   	{
-    	die('Could not connect: ' . mysql_error());
-   	}
-   	mysql_select_db( 'shopify', $conn );
+   	$mysqli = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, 'shopify');
+	if (mysqli_connect_errno()) {
+	    printf("Connect failed: %s\n", mysqli_connect_error());
+	    exit();
+	}
 
    	define('TABLE_READ_FILES', 'read_files');
    	define('TABLE_PRODUCTS', 'products');

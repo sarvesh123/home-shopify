@@ -1,10 +1,10 @@
 <?php
 
 function getProducts() {
-    global $conn;
+    global $mysqli;
 
-    $sql = "SELECT * FROM " . TABLE_PRODUCTS;
-    $result = mysql_query( $sql, $conn );
+    $query = "SELECT * FROM " . TABLE_PRODUCTS;
+    $result = $mysqli->query($query);
 
     $products = array();
     if (mysql_num_rows($result)) {
@@ -138,20 +138,21 @@ function getLatestFile($path) {
         $latest_filename = $entry;
       }
     }
-    return $latest_filename;
+    return array('mtime' => $latest_ctime, 'name' => $latest_filename);
 }
 
 function sumQuantity($values) {
-    return ($values[13] + $values[14] + $values[15] + $values[16]);
+    return ($values[14] + $values[15] + $values[16] + $values[17]);
 }
 
 function fileUnread($fileName) {
-    global $conn;
+    global $mysqli;
 
-    $sql = "SELECT id FROM " . TABLE_READ_FILES . " WHERE name = '" . $fileName . "'";
-    $result = mysql_query( $sql, $conn );
+    $query = "SELECT id FROM " . TABLE_READ_FILES . " WHERE name = '" . $fileName . "'";
 
-    if (mysql_num_rows($result)) {
+    $mysqli->query($query);
+
+    if ($mysqli->affected_rows) {
         return false;
     }
     else {
@@ -159,10 +160,42 @@ function fileUnread($fileName) {
     }    
 }
 
-function markFileRead($fileName, $path) {
-    global $conn;
+function saveFileParsedData($fileData, $path, $records_count, $read_count) {
+    global $mysqli;
 
-    $sql = "INSERT INTO " . TABLE_READ_FILES . " (name, path) VALUES ('" . $fileName . "', '" . mysql_real_escape_string($path) . "') ";
+    $query = "INSERT INTO " . TABLE_READ_FILES . " 
+        (
+            name, 
+            path, 
+            records_count, 
+            download_time, 
+            read_date, 
+            read_count
+        ) 
+        VALUES 
+        (   '" . $fileData['name'] . "', 
+            '" . $mysqli->real_escape_string($path) . "', 
+            '" . $records_count . "',
+            '" . date('Y-m-d H:i:s', $fileData['mtime']) . "',
+            '" . date('Y-m-d H:i:s') . "',
+            '" . $read_count . "'
+        )";
 
-    mysql_query( $sql, $conn );
+    $mysqli->query($query);
+}
+
+function truncateTable($tableName) {
+    global $mysqli;
+
+    $query = "TRUNCATE TABLE " . $tableName;
+
+    $mysqli->query($query);
+}
+
+function updateShopifyPosted() {
+    global $mysqli;
+
+    $query = "UPDATE " . TABLE_READ_FILES . " SET shopify_posted = '" . date('Y-m-d H:i:s') . "' WHERE shopify_posted IS NULL";
+
+    $mysqli->query($query);
 }
