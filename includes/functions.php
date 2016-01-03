@@ -7,8 +7,8 @@ function getProducts() {
     $result = $mysqli->query($query);
 
     $products = array();
-    if (mysql_num_rows($result)) {
-        while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
+    if ($mysqli->affected_rows) {
+        while($row = $result->fetch_array()) {
             $products[] = createMapping($row);  
         }
         return $products;
@@ -19,7 +19,7 @@ function getProducts() {
 }
 
 function createMapping($field) {
-    $arr['title'] = $field['vendor'] . ' ' . $field['title'];
+    $arr['title'] = $field['vendor'] . ' ' . $field['name'];
     $arr['body_html'] = $field['description'];
     $arr['vendor'] = $field['vendor'];
     $arr['product_type'] = $field['type'];
