@@ -8,7 +8,13 @@
 	require __DIR__.'/conf.php';
 	require __DIR__.'/includes/functions.php';
 
+	$shopify = shopify\client(SHOPIFY_SHOP, SHOPIFY_APP_API_KEY, SHOPIFY_APP_PASSWORD, true);
+
 	$products = getProducts();
+
+	$shopifyProducts = getShopifyProducts($shopify);
+
+	$shopifyCompareArr = createShopifyCompareArr($shopifyProducts);
 
    	if ($products) {
 
@@ -17,28 +23,16 @@
 		    $data = array('product' => $product);
 
 		    echo "<pre>";
-			try
-			{
-				$shopify = shopify\client(SHOPIFY_SHOP, SHOPIFY_APP_API_KEY, SHOPIFY_APP_PASSWORD, true);
-				# Making an API request can throw an exception
-				$response = $shopify('POST /admin/products.json', array(), $data);
+		    if ( $productId = skuMatch($product['variants'][0]['sku'], $shopifyCompareArr) ) {
+		    	if (isset($productId)) {
+		    		unset($data['product']['variants']);
+		    		updateShopifyProduct($shopify, $data, $productId);
+		    	}
+		    }
+		    else {
+		    	createShopifyProduct($shopify, $data);
+		    }
 
-				print_r($response);
-			}
-			catch (shopify\ApiException $e)
-			{
-				# HTTP status code was >= 400 or response contained the key 'errors'
-				echo $e;
-				print_R($e->getRequest());
-				print_R($e->getResponse());
-			}
-			catch (shopify\CurlException $e)
-			{
-				# cURL error
-				echo $e;
-				print_R($e->getRequest());
-				print_R($e->getResponse());
-			}
 			echo "</pre>";
 		}
 		updateShopifyPosted();

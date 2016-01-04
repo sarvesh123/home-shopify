@@ -3,7 +3,7 @@
 function getProducts() {
     global $mysqli;
 
-    $query = "SELECT * FROM " . TABLE_PRODUCTS;
+    $query = "SELECT * FROM " . TABLE_PRODUCTS . " WHERE tags != 'Keywords'";
     $result = $mysqli->query($query);
 
     $products = array();
@@ -82,10 +82,13 @@ function getVariants($products, $pricePlans) {
 }
 
 function getVariantArr($productVariants, $pricePlans) {
+    $variantData = array();
     foreach ($productVariants as $key => $variant) {
         $sku = $variant['sku'];
-        $pricePlan = $pricePlans[$sku];
-        $variantData[] = getVariantData($variant, $pricePlan);
+        if ( array_key_exists($sku, $pricePlans) ) {
+            $pricePlan = $pricePlans[$sku];
+            $variantData[] = getVariantData($variant, $pricePlan);
+        }
     }
     return $variantData;
 }
@@ -198,4 +201,115 @@ function updateShopifyPosted() {
     $query = "UPDATE " . TABLE_READ_FILES . " SET shopify_posted = '" . date('Y-m-d H:i:s') . "' WHERE shopify_posted IS NULL";
 
     $mysqli->query($query);
+}
+
+function getShopifyProducts($shopify) {
+    try
+    {
+        # Making an API request can throw an exception
+        $products = $shopify('GET /admin/products.json', array('published_status'=>'published'));
+        return $products;
+    }
+    catch (shopify\ApiException $e)
+    {
+        # HTTP status code was >= 400 or response contained the key 'errors'
+        echo $e;
+        print_R($e->getRequest());
+        print_R($e->getResponse());
+    }
+    catch (shopify\CurlException $e)
+    {
+        # cURL error
+        echo $e;
+        print_R($e->getRequest());
+        print_R($e->getResponse());
+    }
+}
+
+function createShopifyCompareArr($products) {
+    $shopifyArr = array();
+    foreach ($products as $key => $product) {
+        $shopifyArr[$key]['id'] = $product['id'];
+        $shopifyArr[$key]['sku'] = $product['variants'][0]['sku'];
+    }
+    return $shopifyArr;
+}
+
+function skuMatch($needle, $haystack, $strict = false) {
+    foreach ($haystack as $item) {
+        if (($strict ? $item === $needle : $item == $needle) || (is_array($item) && skuMatch($needle, $item, $strict))) {
+            return (isset($item['id']) ? $item['id']:$item);
+        }
+    }
+
+    return false;
+}
+
+function createShopifyProduct($shopify, $data) {
+    try
+    {
+        # Making an API request can throw an exception
+        $response = $shopify('POST /admin/products.json', array(), $data);
+        print_r($response);
+    }
+    catch (shopify\ApiException $e)
+    {
+        # HTTP status code was >= 400 or response contained the key 'errors'
+        echo $e;
+        print_R($e->getRequest());
+        print_R($e->getResponse());
+    }
+    catch (shopify\CurlException $e)
+    {
+        # cURL error
+        echo $e;
+        print_R($e->getRequest());
+        print_R($e->getResponse());
+    }
+}
+
+function updateShopifyProduct($shopify, $data, $productId) {
+    try
+    {
+        # Making an API request can throw an exception
+        $response = $shopify('PUT /admin/products/' . $productId . '.json', array(), $data);
+        print_r($response);
+    }
+    catch (shopify\ApiException $e)
+    {
+        # HTTP status code was >= 400 or response contained the key 'errors'
+        echo $e;
+        print_R($e->getRequest());
+        print_R($e->getResponse());
+    }
+    catch (shopify\CurlException $e)
+    {
+        # cURL error
+        echo $e;
+        print_R($e->getRequest());
+        print_R($e->getResponse());
+    }
+}
+
+function updateVariants($shopify, $data, $variantId) {
+    try
+    {
+        # Making an API request can throw an exception
+        $response = $shopify('PUT /admin/variants/' . $variantId . '.json', array(), $data);
+        print_r($response);
+    }
+    catch (shopify\ApiException $e)
+    {
+        # HTTP status code was >= 400 or response contained the key 'errors'
+        echo $e;
+        print_R($e->getRequest());
+        print_R($e->getResponse());
+    }
+    catch (shopify\CurlException $e)
+    {
+        # cURL error
+        echo $e;
+        print_R($e->getRequest());
+        print_R($e->getResponse());
+    }    
 }
