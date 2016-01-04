@@ -97,32 +97,33 @@ function getVariantData($variant, $pricePlan) {
 
     switch ($variant['option1']) {
         case PRICE_X4C2:
-            $data = makeVariantArr($variant['id'], $pricePlan['X4C2']);
+            $data = makeVariantArr($variant, $pricePlan['X4C2']);
         break;
 
         case PRICE_X4C3:
-            $data = makeVariantArr($variant['id'], $pricePlan['X4C3']);
+            $data = makeVariantArr($variant, $pricePlan['X4C3']);
         break;
 
         case PRICE_X6C1:
-            $data = makeVariantArr($variant['id'], $pricePlan['X6C1']);
+            $data = makeVariantArr($variant, $pricePlan['X6C1']);
         break;
 
         case PRICE_X6C2:
-            $data = makeVariantArr($variant['id'], $pricePlan['X6C2']);
+            $data = makeVariantArr($variant, $pricePlan['X6C2']);
         break;
 
         case PRICE_X6C3:
-            $data = makeVariantArr($variant['id'], $pricePlan['X6C3']);
+            $data = makeVariantArr($variant, $pricePlan['X6C3']);
         break;
     }
 
     return $data;
 }
 
-function makeVariantArr($id, $price) {
+function makeVariantArr($variant, $price) {
     return array(
-            'id' => $id,
+            'id' => $variant['id'],
+            'sku' => $variant['sku'],
             'price' => $price
         );
 }
@@ -311,5 +312,20 @@ function updateVariants($shopify, $data, $variantId) {
         echo $e;
         print_R($e->getRequest());
         print_R($e->getResponse());
+    }    
+}
+
+function getProductBySku($sku) {
+    global $mysqli;
+
+    $query = "SELECT compare_price, weight, quantity, sku FROM " . TABLE_PRODUCTS . " WHERE sku = '" . $sku . "'";
+    $result = $mysqli->query($query);
+
+    $products = array();
+    if ($mysqli->affected_rows) {
+        return $result->fetch_assoc();
+    }
+    else {
+        return false;
     }    
 }
