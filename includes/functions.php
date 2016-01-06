@@ -251,7 +251,7 @@ function createShopifyProduct($shopify, $data) {
     {
         # Making an API request can throw an exception
         $response = $shopify('POST /admin/products.json', array(), $data);
-        print_r($response);
+        //print_r($response);
     }
     catch (shopify\ApiException $e)
     {
@@ -274,7 +274,7 @@ function updateShopifyProduct($shopify, $data, $productId) {
     {
         # Making an API request can throw an exception
         $response = $shopify('PUT /admin/products/' . $productId . '.json', array(), $data);
-        print_r($response);
+        //print_r($response);
     }
     catch (shopify\ApiException $e)
     {
@@ -297,7 +297,7 @@ function updateVariants($shopify, $data, $variantId) {
     {
         # Making an API request can throw an exception
         $response = $shopify('PUT /admin/variants/' . $variantId . '.json', array(), $data);
-        print_r($response);
+        //print_r($response);
     }
     catch (shopify\ApiException $e)
     {

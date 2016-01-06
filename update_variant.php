@@ -21,6 +21,7 @@
 	$pricePlans = getPricePlans($PricePlanReader);
 	$response = getVariants($products, $pricePlans);
 	
+	$updatedVariantsCnt=0;
 	foreach ($response as $variantData) {
 
 		$variantId = $variantData['id'];
@@ -34,6 +35,10 @@
 		$data = array('variant' => $variant);
 		
 		updateVariants($shopify, $data, $variantId);
+		$updatedVariantsCnt++;
 	}
 
 	echo "</pre>";
+?>
+	Updated <?php echo $updatedVariantsCnt; ?> Products Variants.<br />
+	<a href="<?php echo SITE_URL; ?>/index.php">Home</a>

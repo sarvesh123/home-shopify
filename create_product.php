@@ -16,6 +16,8 @@
 
 	$shopifyCompareArr = createShopifyCompareArr($shopifyProducts);
 
+	$createdProdCnt=0;
+	$updatedProdCnt=0;
    	if ($products) {
 
 		foreach($products as $product) {
@@ -27,12 +29,13 @@
 		    	if (isset($productId)) {
 		    		unset($data['product']['variants']);
 		    		updateShopifyProduct($shopify, $data, $productId);
+		    		$updatedProdCnt++;
 		    	}
 		    }
 		    else {
 		    	createShopifyProduct($shopify, $data);
+		    	$createdProdCnt++;
 		    }
-
 			echo "</pre>";
 		}
 		updateShopifyPosted();
@@ -41,3 +44,11 @@
 		echo 'No Products found.';
 	}
 	$mysqli->close();
+
+	if ($products) : 
+?>
+		Created <?php echo $createdProdCnt; ?> Products.<br />
+		Updated <?php echo $updatedProdCnt; ?> Products.<br />
+		<a href="<?php echo SITE_URL; ?>/update_variant.php">Update Variants</a>
+<?php		
+	endif;

@@ -14,7 +14,7 @@
 
 	define('PRODUCTS_FILE_PATH', __DIR__.'/uploads');
 
-	error_reporting(E_ALL);
+	error_reporting(0);
 	ini_set("display_errors", 1);
 
 	define('DB_HOST', 'localhost');
@@ -29,4 +29,5 @@
 
    	define('TABLE_READ_FILES', 'read_files');
    	define('TABLE_PRODUCTS', 'products');
+   	define('SITE_URL', 'http://localhost/home-shopify');
    		
