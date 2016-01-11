@@ -12,15 +12,15 @@
 
 	require __DIR__.'/spreadsheet-reader/SpreadsheetReader.php';
 
+	$PricePlanReader = new SpreadsheetReader('price_plan.xlsx');
+
+	$pricePlans = getPricePlans($PricePlanReader);
+
 	$shopify = shopify\client(SHOPIFY_SHOP, SHOPIFY_APP_API_KEY, SHOPIFY_APP_PASSWORD, true);
 
 	echo "<pre>";
 
 	$products = getShopifyProducts($shopify);
-
-	$PricePlanReader = new SpreadsheetReader('price_plan.xlsx');
-
-	$pricePlans = getPricePlans($PricePlanReader);
 
 	$response = getVariants($products, $pricePlans);
 
