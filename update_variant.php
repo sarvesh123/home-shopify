@@ -44,6 +44,8 @@
 
 		updateVariants($shopify, $data, $variantId);
 
+		usleep(2000000);
+		
 		$updatedVariantsCnt++;
 
 	}
