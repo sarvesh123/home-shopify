@@ -10,15 +10,17 @@
 
 	require __DIR__.'/includes/functions.php';
 
+	require __DIR__.'/spreadsheet-reader/php-excel-reader/excel_reader2.php';
+	
 	require __DIR__.'/spreadsheet-reader/SpreadsheetReader.php';
 
-	$PricePlanReader = new SpreadsheetReader('price_plan.xlsx');
+	echo "<pre>";
+
+	$PricePlanReader = new SpreadsheetReader('price_plan.xls');
 
 	$pricePlans = getPricePlans($PricePlanReader);
 
 	$shopify = shopify\client(SHOPIFY_SHOP, SHOPIFY_APP_API_KEY, SHOPIFY_APP_PASSWORD, true);
-
-	echo "<pre>";
 
 	$products = getShopifyProducts($shopify);
 

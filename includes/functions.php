@@ -508,7 +508,7 @@ function updateVariants($shopify, $data, $variantId) {
 
         $response = $shopify('PUT /admin/variants/' . $variantId . '.json', array(), $data);
 
-        //print_r($response);
+        print_r($variantId);
 
     }
 
